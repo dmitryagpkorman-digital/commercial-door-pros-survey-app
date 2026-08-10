@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commercial Door Pros — Site Survey &amp; Quote App</title>
+<style>
+  :root{
+    --green: #0ee112;
+    --green-dark: #1f4d34;
+    --quote-accent: #0ee112;
+    --bg: #f6f8f6;
+    --card: #ffffff;
+    --red: #c0392b;
+    --border: #dfe6e2;
+    --text: #1c2b23;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg); color: var(--text);
+  }
+  header.app-header{
+    background: var(--green-dark); color:#fff; padding:16px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  header.app-header h1{ font-size:18px; margin:0; }
+  header.app-header p{ margin:2px 0 0; font-size:12px; opacity:0.85; }
+  .back-btn{
+    background:transparent; border:1px solid rgba(255,255,255,0.5); color:#fff;
+    padding:6px 12px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  main{ max-width:960px; margin:0 auto; padding:20px; }
+  .hidden{ display:none !important; }
+  .big-actions{ display:flex; flex-direction:column; gap:14px; margin-top:20px; }
+  .big-btn{
+    background: var(--green); color:#0b3d0b; border:none; border-radius:10px;
+    padding:22px; font-size:18px; font-weight:600; cursor:pointer;
+    box-shadow:0 2px 4px rgba(0,0,0,0.08);
+  }
+  .big-btn.secondary{ background:#fff; color:var(--green-dark); border:2px solid var(--green); }
+  .big-btn:disabled{ opacity:0.55; cursor:not-allowed; }
+  .link-btn{ background:none; border:none; color:var(--green-dark); text-decoration:underline; cursor:pointer; font-size:13px; padding:4px 0; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:16px; }
+  label{ display:block; font-size:13px; font-weight:600; margin:12px 0 4px; color:var(--green-dark); }
+  input[type=text], input[type=number], input[type=email], textarea, select{
+    width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; font-size:14px;
+  }
+  textarea{ min-height:90px; resize:vertical; }
+  .choice-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .choice-btn{
+    padding:10px 14px; border-radius:8px; border:1.5px solid var(--border); background:#fff;
+    cursor:pointer; font-size:14px; color:var(--text);
+  }
+  .choice-btn.selected{ background: var(--green); color:#0b3d0b; border-color:var(--green); }
+  .voice-btn{
+    width:100%; padding:16px; font-size:16px; font-weight:600; border-radius:10px; border:none;
+    background: var(--green); color:#0b3d0b; cursor:pointer; margin-top:10px;
+  }
+  .voice-btn.listening{ background:#e0a11c; color:#fff; }
+  .voice-btn.captured{ background: var(--green-dark); color:#fff; }
+  .voice-btn.unavailable{ background:#8a8f8c; color:#fff; cursor:not-allowed; }
+  .voice-status{ font-size:12px; color:#556; margin-top:6px; }
+  .photo-slots{ display:grid; grid-template-columns: repeat(2,1fr); gap:10px; margin-top:8px; }
+  .photo-slot{ border:1.5px dashed var(--border); border-radius:8px; padding:10px; text-align:center; font-size:12px; }
+  .photo-slot img{ max-width:100%; max-height:110px; display:block; margin:0 auto 6px; border-radius:6px; }
+  .photo-controls{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+  .photo-pick-btn{ margin:0; }
+  .photo-file-name{ font-size:11px; color:#667; }
+  .row-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .btn{ padding:9px 14px; border-radius:7px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:13px; }
+  .btn.primary{ background:var(--green); border-color:var(--green); color:#0b3d0b; font-weight:600; }
+  .btn.danger{ background:#fff; border-color:var(--red); color:var(--red); }
+  .btn.danger.filled{ background:var(--red); color:#fff; }
+  table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+  th{ background: var(--green-dark); color:#fff; text-align:left; padding:8px; }
+  td{ padding:8px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .status-pill{ background:#eef4ee; color:var(--green-dark); padding:3px 8px; border-radius:12px; font-size:11px; }
+  .status-pill.void{ background:#fbeaea; color:var(--red); }
+  .empty-state{ text-align:center; color:#667; padding:30px 10px; }
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:50;
+  }
+  .modal{ background:#fff; border-radius:10px; padding:20px; max-width:420px; width:90%; }
+  .modal h3{ margin-top:0; color:var(--red); }
+  .collapsible-toggle{
+    background:#eef4ee; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:600; color:var(--green-dark);
+    width:100%; text-align:left; margin-top:14px;
+  }
+  .report-section{ margin-bottom:14px; }
+  .report-section h4{ margin-bottom:4px; color:var(--green-dark); border-bottom:1px solid var(--border); padding-bottom:4px; }
+  .report-photos{ display:flex; flex-wrap:wrap; gap:8px; }
+  .report-photos img{ max-width:140px; border-radius:6px; border:1px solid var(--border); }
+  .test-note{ font-size:12px; background:#fff8e1; border:1px solid #e0c060; padding:10px; border-radius:8px; margin-top:10px; }
+  .li-table input{ padding:6px; font-size:13px; }
+  .li-table td{ vertical-align:middle; }
+  .totals-box{ margin-top:14px; border-top:2px solid var(--green-dark); padding-top:10px; }
+  .totals-box{ border-top-color: var(--quote-accent); }
+  .totals-row{ display:flex; justify-content:space-between; padding:4px 0; font-size:14px; }
+  .totals-row.grand{ font-weight:700; font-size:16px; color:var(--quote-accent); }
+  .logo-mark{
+    width:42px; height:42px; border-radius:8px; background:var(--green); color:#0b3d0b;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px;
+  }
+  .quote-header{ display:flex; align-items:center; gap:10px; }
+  @media print{
+    header, .no-print{ display:none !important; }
+    main{ max-width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="quote-header">
+    <div class="logo-mark">CDP</div>
+    <div>
+      <h1>Commercial Door Pros</h1>
+      <p>Commercial Doors, Hardware &amp; Glass — Survey &amp; Quote App</p>
+    </div>
+  </div>
+  <button class="back-btn no-print hidden" id="backBtn">&larr; Dashboard</button>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section id="view-dashboard">
+    <div class="big-actions">
+      <button class="big-btn" id="btnNewSurvey">New Quick Survey</button>
+      <button class="big-btn secondary" id="btnContinueDraft">Continue Draft</button>
+      <button class="big-btn secondary" id="btnCustomerQuotes">Customer Quotes</button>
+    </div>
+    <div style="text-align:center; margin-top:10px">
+      <button class="link-btn" id="btnCompanySettings">Company Settings</button>
+    </div>
+  </section>
+
+  <!-- COMPANY SETTINGS -->
+  <section id="view-settings" class="hidden">
+    <div class="card">
+      <h2 style="color:var(--green-dark)">Company Settings</h2>
+      <p class="test-note">These fields drive the header/footer on every Survey Report and Customer Quote. Edit them here — the quote/report templates never need code changes.</p>
+      <label>Company Name</label>
+      <input type="text" id="cs_name">
+      <label>Tagline</label>
+      <input type="text" id="cs_tagline">
+      <label>Logo Text (short mark)</label>
+      <input type="text" id="cs_logo">
+      <label>Address</label>
+      <input type="text" id="cs_address">
+      <label>Phone</label>
+      <input type="text" id="cs_phone">
+      <label>Email</label>
+      <input type="text" id="cs_email">
+      <label>Website</label>
+      <input type="text" id="cs_website">
+      <label>HST Number</label>
+      <input type="text" id="cs_hst">
+      <label>Quote Terms &amp; Warranty Template (editable)</label>
+      <textarea id="cs_terms" style="min-height:220px"></textarea>
+      <div class="row-actions">
+        <button class="btn primary" id="btnSaveSettings">Save Settings</button>
+        <button class="btn" id="btnCancelSettings">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW / EDIT SURVEY -->
+  <section id="view-survey" class="hidden">
+    <div class="card">
+      <h2 id="surveyFormTitle" style="color:var(--green-dark)">New Quick Survey</h2>
+
+      <label>Street Address *</label>
+      <input type="text" id="f_address" placeholder="e.g. 123 King St West">
+
+      <label>Building / Property Name (optional)</label>
+      <input type="text" id="f_building">
+
+      <label>Unit / Suite / Floor (optional)</label>
+      <input type="text" id="f_unit">
+
+      <label>What Needs Service?</label>
+      <div class="choice-grid" id="assetChoices"></div>
+
+      <label>What Is the Problem? (select all that apply)</label>
+      <div class="choice-grid" id="problemChoices"></div>
+
+      <label>Take Photos</label>
+      <div class="photo-slots" id="photoSlots"></div>
+
+      <label>Describe What You Found</label>
+      <button class="voice-btn" id="voiceBtn"></button>
+      <div class="voice-status" id="voiceStatus"></div>
+      <textarea id="f_note" placeholder="Technician note (voice transcript appears here — you can also type)"></textarea>
+
+      <button class="collapsible-toggle" id="toggleProDetails">+ Add Professional Details (optional)</button>
+      <div id="proDetails" class="hidden">
+        <label>Office Notes (internal only — never sent to customer)</label>
+        <textarea id="f_officeNotes"></textarea>
+        <label>Door / Frame Details</label>
+        <textarea id="f_doorFrame"></textarea>
+        <label>Glass / Hardware Details</label>
+        <textarea id="f_glassHardware"></textarea>
+        <label>Access &amp; Safety</label>
+        <textarea id="f_access"></textarea>
+        <label>Supplier / Pricing Notes</label>
+        <textarea id="f_supplier"></textarea>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn primary" id="btnSaveSurvey">Save for Review</button>
+        <button class="btn" id="btnCancelSurvey">Cancel</button>
+      </div>
+      <p class="voice-status" id="saveHint"></p>
+    </div>
+  </section>
+
+  <!-- SAVED CONFIRMATION -->
+  <section id="view-saved" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2 style="color:var(--green-dark)">Survey Saved</h2>
+      <p id="savedSummary"></p>
+      <div class="row-actions" style="justify-content:center">
+        <button class="btn primary" id="btnStartNext">Start Next Survey</button>
+        <button class="btn" id="btnGoToList">View Saved Surveys</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SURVEY LIST -->
+  <section id="view-list" class="hidden">
+    <div class="card">
+      <h2 style="color:var(--green-dark)">Site Surveys</h2>
+      <div id="listContainer"></div>
+    </div>
+  </section>
+
+  <!-- SURVEY REPORT -->
+  <section id="view-report" class="hidden">
+    <div class="card" id="reportContainer"></div>
+    <div class="row-actions no-print">
+      <button class="btn primary" id="btnPrintReport">Print / Save Survey PDF</button>
+      <button class="btn" id="btnEmailReport">Open Email Draft</button>
+    </div>
+    <p class="test-note no-print">Browsers cannot auto-attach the generated PDF to an email draft. Use "Print / Save Survey PDF" first, save the file, then attach it manually in Outlook/Gmail after "Open Email Draft" opens your mail client.</p>
+  </section>
+
+  <!-- QUOTE FORM (create/edit) -->
+  <section id="view-quote-form" class="hidden">
+    <div class="card">
+      <h2 id="quoteFormTitle" style="color:var(--quote-accent)">Create Quote</h2>
+      <p class="voice-status" id="quoteSurveyRef"></p>
+
+      <label>Client / Recipient Name</label>
+      <input type="text" id="q_clientName" placeholder="e.g. Property manager or company name">
+      <label>Client / Property Address</label>
+      <input type="text" id="q_clientAddress">
+
+      <label>Quote Status</label>
+      <select id="q_status">
+        <option value="Draft">Draft</option>
+        <option value="Sent">Sent</option>
+        <option value="Approved">Approved</option>
+        <option value="Declined">Declined</option>
+      </select>
+
+      <label>Scope of Work (customer-facing)</label>
+      <textarea id="q_scope" placeholder="Describe the work to be performed"></textarea>
+
+      <label>Line Items</label>
+      <div style="overflow-x:auto">
+      <table class="li-table">
+        <thead><tr><th>Product / Service</th><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th><th></th></tr></thead>
+        <tbody id="lineItemsBody"></tbody>
+      </table>
+      </div>
+      <div class="row-actions">
+        <select id="q_catalogPick" style="max-width:260px"></select>
+        <button class="btn" id="btnAddLineItem">+ Add Line Item</button>
+      </div>
+
+      <label>Lead Time</label>
+      <input type="text" id="q_leadTime" placeholder="e.g. 2-3 weeks">
+
+      <label>Deposit</label>
+      <select id="q_depositRate">
+        <option value="0.5">50%</option>
+        <option value="1.0">100%</option>
+      </select>
+
+      <div class="totals-box">
+        <div class="totals-row"><span>Subtotal</span><span id="t_subtotal">$0.00</span></div>
+        <div class="totals-row"><span>HST (13%)</span><span id="t_hst">$0.00</span></div>
+        <div class="totals-row grand"><span>Total</span><span id="t_total">$0.00</span></div>
+        <div class="totals-row"><span>Deposit Due</span><span id="t_deposit">$0.00</span></div>
+      </div>
+
+      <label>Notes &amp; Exclusions / Terms &amp; Warranty (editable template)</label>
+      <textarea id="q_terms" style="min-height:220px"></textarea>
+
+      <div class="row-actions">
+        <button class="btn primary" id="btnSaveQuote">Save Quote</button>
+        <button class="btn" id="btnDiscardQuote">Discard</button>
+      </div>
+      <p class="voice-status" id="quoteSaveHint"></p>
+    </div>
+  </section>
+
+  <!-- QUOTES LIST -->
+  <section id="view-quotes" class="hidden">
+    <div class="card">
+      <h2 style="color:var(--quote-accent)">Customer Quotes</h2>
+      <div id="quotesListContainer"></div>
+    </div>
+  </section>
+
+  <!-- QUOTE REPORT / PDF VIEW -->
+  <section id="view-quote-report" class="hidden">
+    <div class="card" id="quoteReportContainer"></div>
+    <div class="row-actions no-print">
+      <button class="btn primary" id="btnPrintQuote">Print / Save Quote PDF</button>
+      <button class="btn" id="btnEmailQuote">Open Email Draft</button>
+    </div>
+    <p class="test-note no-print">Browsers cannot auto-attach the generated PDF to an email draft. Save the PDF first, then attach it manually after "Open Email Draft" opens your mail client.</p>
+  </section>
+
+  <!-- DELETE SURVEY CONFIRM MODAL -->
+  <div class="modal-backdrop hidden" id="deleteModal">
+    <div class="modal">
+      <h3>Delete this survey?</h3>
+      <p id="deleteModalText"></p>
+      <div class="row-actions">
+        <button class="btn danger filled" id="confirmDeleteBtn">Delete</button>
+        <button class="btn" id="cancelDeleteBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOID/DELETE QUOTE MODAL -->
+  <div class="modal-backdrop hidden" id="voidQuoteModal">
+    <div class="modal">
+      <h3 id="voidQuoteTitle">Void this quote?</h3>
+      <p id="voidQuoteText"></p>
+      <div class="row-actions">
+        <button class="btn danger filled" id="confirmVoidBtn">Void Quote</button>
+        <button class="btn danger" id="confirmHardDeleteBtn">Delete Permanently</button>
+        <button class="btn" id="cancelVoidBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCARD QUOTE CONFIRM MODAL -->
+  <div class="modal-backdrop hidden" id="discardModal">
+    <div class="modal">
+      <h3 style="color:var(--green-dark)">Discard this draft quote?</h3>
+      <p>No quote number has been assigned yet. Discarding now will not use up a Q-number.</p>
+      <div class="row-actions">
+        <button class="btn danger filled" id="confirmDiscardBtn">Discard</button>
+        <button class="btn" id="cancelDiscardBtn">Keep Editing</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ===================== SURVEY CORE LOGIC (Phase 1 — unit-tested with Node) ===================== */
+function pad(n){return n.toString().padStart(2,'0');}
+function todayKey(d){ d = d || new Date(); return d.getFullYear().toString() + pad(d.getMonth()+1) + pad(d.getDate()); }
+
+function generateSurveyNumber(surveys, d){
+  var key = todayKey(d);
+  var prefix = 'SUR-' + key + '-';
+  var maxSeq = 0;
+  surveys.forEach(function(s){
+    if (s.number && s.number.indexOf(prefix) === 0){
+      var seq = parseInt(s.number.slice(prefix.length), 10);
+      if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+    }
+  });
+  var next = maxSeq + 1;
+  return prefix + pad(next).padStart(3,'0');
+}
+
+function saveSurvey(surveys, data, d){
+  var list = surveys.slice();
+  if (data.id){
+    var idx = list.findIndex(function(s){ return s.id === data.id; });
+    if (idx === -1) throw new Error('Survey id not found for edit: ' + data.id);
+    var updated = Object.assign({}, list[idx], data, { updatedAt: (d||new Date()).toISOString() });
+    list[idx] = updated;
+    return { surveys: list, survey: updated };
+  } else {
+    var number = generateSurveyNumber(list, d);
+    var id = 'srv_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    var newSurvey = Object.assign({}, data, {
+      id: id, number: number, status: data.status || 'Needs Review',
+      createdAt: (d||new Date()).toISOString(), updatedAt: (d||new Date()).toISOString()
+    });
+    list.push(newSurvey);
+    return { surveys: list, survey: newSurvey };
+  }
+}
+
+function deleteSurvey(surveys, id){
+  var found = surveys.some(function(s){ return s.id === id; });
+  if (!found) throw new Error('Survey id not found for delete: ' + id);
+  return surveys.filter(function(s){ return s.id !== id; });
+}
+
+function toggleInArray(arr, value){
+  var i = arr.indexOf(value);
+  if (i === -1) { arr = arr.concat([value]); } else { arr = arr.slice(0,i).concat(arr.slice(i+1)); }
+  return arr;
+}
+
+var VOICE_STATES = { IDLE: 'idle', LISTENING: 'listening', CAPTURED: 'captured', UNAVAILABLE: 'unavailable' };
+function voiceButtonLabel(state){
+  switch(state){
+    case VOICE_STATES.IDLE: return '\uD83C\uDF99 Start Voice Note';
+    case VOICE_STATES.LISTENING: return 'Listening\u2026 click to stop';
+    case VOICE_STATES.CAPTURED: return 'Voice Note Captured';
+    case VOICE_STATES.UNAVAILABLE: return 'Voice input unavailable \u2014 type your note below';
+    default: return '';
+  }
+}
+/* ===================== QUOTE CORE LOGIC (Phase 2 — unit-tested with Node, 14/14 passing) ===================== */
+function padQ(n){ return n.toString(); }
+
+function nextQuoteSeq(counterState){
+  var base = 1000;
+  var last = (counterState && typeof counterState.lastIssued === 'number') ? counterState.lastIssued : base;
+  return last + 1;
+}
+
+function formatQuoteNumber(seq){
+  return 'Q-' + seq;
+}
+
+function computeTotals(lineItems, depositRate){
+  var subtotal = lineItems.reduce(function(sum, li){
+    var qty = Number(li.qty) || 0;
+    var price = Number(li.unitPrice) || 0;
+    return sum + (qty * price);
+  }, 0);
+  var hst = round2(subtotal * 0.13);
+  var total = round2(subtotal + hst);
+  var deposit = round2(total * depositRate);
+  return { subtotal: round2(subtotal), hst: hst, total: total, deposit: deposit };
+}
+
+function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+
+function addLineItem(lineItems, item){
+  var withId = Object.assign({ id: 'li_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8) }, item);
+  return lineItems.concat([withId]);
+}
+
+function updateLineItem(lineItems, id, patch){
+  var idx = lineItems.findIndex(function(li){ return li.id === id; });
+  if (idx === -1) throw new Error('Line item not found: ' + id);
+  var list = lineItems.slice();
+  list[idx] = Object.assign({}, list[idx], patch);
+  return list;
+}
+
+function deleteLineItem(lineItems, id){
+  var found = lineItems.some(function(li){ return li.id === id; });
+  if (!found) throw new Error('Line item not found: ' + id);
+  return lineItems.filter(function(li){ return li.id !== id; });
+}
+
+function saveQuote(quotes, data, counterState, d){
+  var list = quotes.slice();
+  if (data.id){
+    var idx = list.findIndex(function(q){ return q.id === data.id; });
+    if (idx === -1) throw new Error('Quote id not found for edit: ' + data.id);
+    var updated = Object.assign({}, list[idx], data, { updatedAt: (d||new Date()).toISOString() });
+    list[idx] = updated;
+    return { quotes: list, quote: updated, counterState: counterState };
+  } else {
+    var seq = nextQuoteSeq(counterState);
+    var newCounterState = { lastIssued: seq };
+    var number = formatQuoteNumber(seq);
+    var id = 'qt_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    var newQuote = Object.assign({}, data, {
+      id: id, number: number, status: data.status || 'Draft',
+      createdAt: (d||new Date()).toISOString(), updatedAt: (d||new Date()).toISOString()
+    });
+    list.push(newQuote);
+    return { quotes: list, quote: newQuote, counterState: newCounterState };
+  }
+}
+
+function voidQuote(quotes, id, d){
+  var idx = quotes.findIndex(function(q){ return q.id === id; });
+  if (idx === -1) throw new Error('Quote id not found for void: ' + id);
+  var list = quotes.slice();
+  list[idx] = Object.assign({}, list[idx], { status: 'Void', voidedAt: (d||new Date()).toISOString() });
+  return list;
+}
+
+function deleteQuote(quotes, id){
+  var found = quotes.some(function(q){ return q.id === id; });
+  if (!found) throw new Error('Quote id not found for delete: ' + id);
+  return quotes.filter(function(q){ return q.id !== id; });
+}
+/* ===================== END CORE LOGIC ===================== */
+
+var SURVEY_KEY = 'cdp_surveys_v1';
+var QUOTES_KEY = 'cdp_quotes_v1';
+var QUOTE_COUNTER_KEY = 'cdp_quote_counter_v1';
+var SETTINGS_KEY = 'cdp_company_settings_v1';
+var SEED_KEY = 'cdp_seed_v1_done';
+
+function loadJSON(key, fallback){
+  try { var v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fallback : v; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+var DEFAULT_SETTINGS = {
+  name: 'Commercial Door Pros',
+  tagline: 'Commercial Doors, Hardware & Glass',
+  logo: 'CDP',
+  address: '[To be added]',
+  phone: '[To be added]',
+  email: '[To be added]',
+  website: '[To be added]',
+  hst: '[To be added]',
+  terms: "Payment condition:\nC.O.D. customers: balance due upon completion date.\n\nNotes:\n- All interior post-installation finishing, including drywall, flooring, painting, and touch-ups, must be completed by others.\n- Any existing door access controls and security-alarm-system integration are by others.\n- This quote is valid for 30 days. Values may be subject to change after that period.\n\nTerms and Conditions:\n- Net amount is due upon receipt.\n- Accounts overdue by more than 7 days are subject to a 5% late-payment fee.\n- Accounts overdue by more than 35 days may be subject to collection through court action.\n\nWarranty:\n- New installation: 1 year on parts and 90 days on labour.\n- Service work: 90 days on parts and 30 days on labour.\n- No warranty applies to cracked or broken glass.\n- Warranty is null and void if invoices are not paid according to contract terms.\n- Warranty excludes damage or defects caused by abuse, modifications not performed by the contractor, improper or insufficient maintenance, or improper operation."
+};
+
+var surveys = loadJSON(SURVEY_KEY, []);
+var quotes = loadJSON(QUOTES_KEY, []);
+var quoteCounter = loadJSON(QUOTE_COUNTER_KEY, { lastIssued: 1000 });
+var companySettings = loadJSON(SETTINGS_KEY, DEFAULT_SETTINGS);
+
+function persistSurveys(){ saveJSON(SURVEY_KEY, surveys); }
+function persistQuotes(){ saveJSON(QUOTES_KEY, quotes); }
+function persistCounter(){ saveJSON(QUOTE_COUNTER_KEY, quoteCounter); }
+function persistSettings(){ saveJSON(SETTINGS_KEY, companySettings); }
+
+/* ---- Phase 2 test-data seed (runs once) ---- */
+(function seedTestSurveys(){
+  if (loadJSON(SEED_KEY, false)) return;
+  var testSurveys = [
+{
+ "number": "SUR-20260810-001",
+ "address": "123 King Street West",
+ "building": "Test Commercial Property",
+ "unit": "",
+ "asset": "Steel Door",
+ "problems": ["Lock problem", "Does not latch"],
+ "note": "Rear steel exit door does not latch consistently. Existing mortise lock is worn and latch bolt does not fully engage the strike. Door is rubbing slightly at the frame. Standard daytime access. Please quote repair option and replacement lock option.",
+ "officeNotes": "Need Option A: repair / adjustment. Need Option B: replacement mortise lock. Confirm lock function and finish before ordering.",
+ "doorFrame": "Commercial steel door, single leaf.",
+ "glassHardware": "Door closer present. Existing mortise lock and lever trim. Verify handing, backset, lock function and cylinder keying on site.",
+ "access": "Standard daytime access. No lift required.",
+ "supplier": "Request price and availability for compatible commercial mortise lock and lever trim.",
+ "photos": {}
+},
+{
+ "number": "SUR-20260810-002",
+ "address": "55 Guardsman Road",
+ "building": "Test Office Building",
+ "unit": "",
+ "asset": "Storefront Glass",
+ "problems": ["Broken glass"],
+ "note": "One storefront glass panel is cracked. Approximate visible glass size: 20 3/4 x 51 1/2 inches. Clear double-pane sealed unit required. Need supplier price, lead time, de-glazing, disposal and installation.",
+ "officeNotes": "Quote must include glass supply, labour, de-glazing and disposal.",
+ "doorFrame": "",
+ "glassHardware": "",
+ "access": "Ground-level access. Standard daytime work.",
+ "supplier": "",
+ "photos": {}
+}
+];
+  testSurveys.forEach(function(t){
+    var exists = surveys.some(function(s){ return s.number === t.number; });
+    if (exists) return;
+    var now = new Date().toISOString();
+    surveys.push(Object.assign({}, t, {
+      id: 'srv_seed_' + t.number,
+      status: 'Needs Review',
+      createdAt: now,
+      updatedAt: now
+    }));
+  });
+  persistSurveys();
+  saveJSON(SEED_KEY, true);
+})();
+
+var ASSET_TYPES = ['Glass Door','Steel Door','Storefront Glass','Window / Sealed Unit','Door Hardware','Automatic Door','Not Sure'];
+var PROBLEMS = ['Will not close','Does not latch','Broken glass','Foggy / failed sealed unit','Closer problem','Lock problem','Hinge / pivot problem','Door damaged','Water leak','Not sure'];
+var PHOTO_SLOTS = ['Full opening','Problem area','Label/model','Measurement (if relevant)'];
+var LINE_ITEM_CATALOG = ["Labour","Materials","Service Call","Delivery","Disposal","De-glazing","Skyjack / Lift Rental","Extra Manpower","After-hours Service","Emergency Service","Glass / Sealed Unit","Door Closer","Panic Bar","Lock / Cylinder","Hinges / Pivots","Weatherstripping","Door Slab","Door Frame","Storefront Glass"];
+
+var state = {
+  editingId: null,
+  selectedAsset: null,
+  selectedProblems: [],
+  photos: {},
+  voiceState: VOICE_STATES.IDLE,
+  currentReportId: null,
+  pendingDeleteId: null,
+  currentQuoteReportId: null,
+  pendingVoidQuoteId: null,
+  quoteDraft: null
+};
+
+function $(id){ return document.getElementById(id); }
+function money(n){ return '$' + (Number(n)||0).toFixed(2); }
+
+function showView(name){
+  ['dashboard','settings','survey','saved','list','report','quote-form','quotes','quote-report'].forEach(function(v){
+    $('view-'+v).classList.toggle('hidden', v !== name);
+  });
+  $('backBtn').classList.toggle('hidden', name === 'dashboard');
+}
+
+$('backBtn').addEventListener('click', function(){ showView('dashboard'); });
+
+/* ================= COMPANY SETTINGS ================= */
+function openSettings(){
+  $('cs_name').value = companySettings.name;
+  $('cs_tagline').value = companySettings.tagline;
+  $('cs_logo').value = companySettings.logo;
+  $('cs_address').value = companySettings.address;
+  $('cs_phone').value = companySettings.phone;
+  $('cs_email').value = companySettings.email;
+  $('cs_website').value = companySettings.website;
+  $('cs_hst').value = companySettings.hst;
+  $('cs_terms').value = companySettings.terms;
+  showView('settings');
+}
+$('btnCompanySettings').addEventListener('click', openSettings);
+$('btnCancelSettings').addEventListener('click', function(){ showView('dashboard'); });
+$('btnSaveSettings').addEventListener('click', function(){
+  companySettings = {
+    name: $('cs_name').value.trim() || DEFAULT_SETTINGS.name,
+    tagline: $('cs_tagline').value.trim(),
+    logo: $('cs_logo').value.trim() || 'CDP',
+    address: $('cs_address').value.trim(),
+    phone: $('cs_phone').value.trim(),
+    email: $('cs_email').value.trim(),
+    website: $('cs_website').value.trim(),
+    hst: $('cs_hst').value.trim(),
+    terms: $('cs_terms').value
+  };
+  persistSettings();
+  showView('dashboard');
+});
+
+/* ================= SURVEY FORM (Phase 1, unchanged behaviour) ================= */
+function renderChoiceGrid(container, options, selectedCheck, onClick){
+  container.innerHTML = '';
+  options.forEach(function(opt){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'choice-btn' + (selectedCheck(opt) ? ' selected' : '');
+    b.textContent = opt;
+    b.addEventListener('click', function(){ onClick(opt); renderSurveyForm(); });
+    container.appendChild(b);
+  });
+}
+
+function renderPhotoSlots(){
+  var container = $('photoSlots');
+  container.innerHTML = '';
+  PHOTO_SLOTS.forEach(function(slotName, idx){
+    var wrap = document.createElement('div');
+    wrap.className = 'photo-slot';
+    var existing = state.photos[slotName];
+    if (existing){
+      var img = document.createElement('img');
+      img.src = existing;
+      wrap.appendChild(img);
+    }
+    var label = document.createElement('div');
+    label.textContent = slotName;
+    wrap.appendChild(label);
+
+    var inputId = 'photoInput_' + idx;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.id = inputId;
+    input.className = 'photo-file-input hidden';
+
+    var pickBtn = document.createElement('label');
+    pickBtn.setAttribute('for', inputId);
+    pickBtn.className = 'btn photo-pick-btn';
+    pickBtn.textContent = existing ? 'Change Photo' : 'Upload Photo';
+
+    var fileNameSpan = document.createElement('span');
+    fileNameSpan.className = 'photo-file-name';
+    fileNameSpan.textContent = existing ? 'Photo added' : 'No file chosen';
+
+    input.addEventListener('change', function(e){
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        state.photos[slotName] = ev.target.result;
+        renderPhotoSlots();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    var controlsRow = document.createElement('div');
+    controlsRow.className = 'photo-controls';
+    controlsRow.appendChild(input);
+    controlsRow.appendChild(pickBtn);
+    controlsRow.appendChild(fileNameSpan);
+
+    wrap.appendChild(controlsRow);
+    container.appendChild(wrap);
+  });
+}
+
+function renderSurveyForm(){
+  renderChoiceGrid($('assetChoices'), ASSET_TYPES,
+    function(opt){ return state.selectedAsset === opt; },
+    function(opt){ state.selectedAsset = opt; });
+  renderChoiceGrid($('problemChoices'), PROBLEMS,
+    function(opt){ return state.selectedProblems.indexOf(opt) !== -1; },
+    function(opt){ state.selectedProblems = toggleInArray(state.selectedProblems, opt); });
+  updateVoiceButton();
+}
+
+function resetSurveyForm(){
+  state.editingId = null;
+  state.selectedAsset = null;
+  state.selectedProblems = [];
+  state.photos = {};
+  state.voiceState = recognitionSupported ? VOICE_STATES.IDLE : VOICE_STATES.UNAVAILABLE;
+  $('f_address').value = '';
+  $('f_building').value = '';
+  $('f_unit').value = '';
+  $('f_note').value = '';
+  $('f_officeNotes').value = '';
+  $('f_doorFrame').value = '';
+  $('f_glassHardware').value = '';
+  $('f_access').value = '';
+  $('f_supplier').value = '';
+  $('proDetails').classList.add('hidden');
+  $('toggleProDetails').textContent = '+ Add Professional Details (optional)';
+  $('surveyFormTitle').textContent = 'New Quick Survey';
+  $('saveHint').textContent = '';
+  renderPhotoSlots();
+  renderSurveyForm();
+}
+
+function loadSurveyIntoForm(survey){
+  state.editingId = survey.id;
+  state.selectedAsset = survey.asset || null;
+  state.selectedProblems = (survey.problems || []).slice();
+  state.photos = Object.assign({}, survey.photos || {});
+  state.voiceState = survey.note ? VOICE_STATES.CAPTURED : (recognitionSupported ? VOICE_STATES.IDLE : VOICE_STATES.UNAVAILABLE);
+  $('f_address').value = survey.address || '';
+  $('f_building').value = survey.building || '';
+  $('f_unit').value = survey.unit || '';
+  $('f_note').value = survey.note || '';
+  $('f_officeNotes').value = survey.officeNotes || '';
+  $('f_doorFrame').value = survey.doorFrame || '';
+  $('f_glassHardware').value = survey.glassHardware || '';
+  $('f_access').value = survey.access || '';
+  $('f_supplier').value = survey.supplier || '';
+  $('surveyFormTitle').textContent = 'Edit Survey — ' + survey.number;
+  $('saveHint').textContent = '';
+  renderPhotoSlots();
+  renderSurveyForm();
+}
+
+/* ---------- Voice ---------- */
+var SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+var recognitionSupported = !!SpeechRecognitionCtor;
+var recognition = null;
+if (recognitionSupported){
+  recognition = new SpeechRecognitionCtor();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  recognition.onresult = function(event){
+    var transcript = '';
+    for (var i = 0; i < event.results.length; i++){
+      transcript += event.results[i][0].transcript + ' ';
+    }
+    $('f_note').value = transcript.trim();
+  };
+  recognition.onerror = function(event){
+    state.voiceState = VOICE_STATES.UNAVAILABLE;
+    $('voiceStatus').textContent = 'Microphone error: ' + event.error + '. You can still type your note manually.';
+    updateVoiceButton();
+  };
+  recognition.onend = function(){
+    if (state.voiceState === VOICE_STATES.LISTENING){
+      state.voiceState = $('f_note').value.trim() ? VOICE_STATES.CAPTURED : VOICE_STATES.IDLE;
+      updateVoiceButton();
+    }
+  };
+}
+
+function updateVoiceButton(){
+  var btn = $('voiceBtn');
+  btn.textContent = voiceButtonLabel(state.voiceState);
+  btn.className = 'voice-btn ' + state.voiceState;
+  btn.disabled = (state.voiceState === VOICE_STATES.UNAVAILABLE);
+  if (state.voiceState === VOICE_STATES.UNAVAILABLE && !$('voiceStatus').textContent){
+    $('voiceStatus').textContent = 'Speech recognition is not available in this browser (or the microphone permission was denied). Manual text entry below still works normally.';
+  } else if (state.voiceState !== VOICE_STATES.UNAVAILABLE) {
+    $('voiceStatus').textContent = 'Tested in Google Chrome. Requires HTTPS (or localhost) and microphone permission.';
+  }
+}
+
+$('voiceBtn').addEventListener('click', function(){
+  if (!recognitionSupported){ return; }
+  if (state.voiceState === VOICE_STATES.LISTENING){
+    recognition.stop();
+    state.voiceState = $('f_note').value.trim() ? VOICE_STATES.CAPTURED : VOICE_STATES.IDLE;
+    updateVoiceButton();
+    return;
+  }
+  try {
+    recognition.start();
+    state.voiceState = VOICE_STATES.LISTENING;
+    updateVoiceButton();
+  } catch(e){
+    state.voiceState = VOICE_STATES.UNAVAILABLE;
+    $('voiceStatus').textContent = 'Could not start microphone: ' + e.message;
+    updateVoiceButton();
+  }
+});
+
+$('toggleProDetails').addEventListener('click', function(){
+  var el = $('proDetails');
+  var willShow = el.classList.contains('hidden');
+  el.classList.toggle('hidden');
+  this.textContent = willShow ? '- Hide Professional Details' : '+ Add Professional Details (optional)';
+});
+
+/* ---------- Dashboard actions ---------- */
+$('btnNewSurvey').addEventListener('click', function(){ resetSurveyForm(); showView('survey'); });
+$('btnContinueDraft').addEventListener('click', function(){ renderList(); showView('list'); });
+$('btnCustomerQuotes').addEventListener('click', function(){ renderQuotesList(); showView('quotes'); });
+
+$('btnCancelSurvey').addEventListener('click', function(){ showView('dashboard'); });
+
+$('btnSaveSurvey').addEventListener('click', function(){
+  var address = $('f_address').value.trim();
+  if (!address){
+    $('saveHint').textContent = 'Street address is required.';
+    $('saveHint').style.color = 'var(--red)';
+    return;
+  }
+  var data = {
+    id: state.editingId,
+    address: address,
+    building: $('f_building').value.trim(),
+    unit: $('f_unit').value.trim(),
+    asset: state.selectedAsset,
+    problems: state.selectedProblems.slice(),
+    photos: Object.assign({}, state.photos),
+    note: $('f_note').value.trim(),
+    officeNotes: $('f_officeNotes').value.trim(),
+    doorFrame: $('f_doorFrame').value.trim(),
+    glassHardware: $('f_glassHardware').value.trim(),
+    access: $('f_access').value.trim(),
+    supplier: $('f_supplier').value.trim()
+  };
+  if (!data.id) delete data.id;
+  var result = saveSurvey(surveys, data);
+  surveys = result.surveys;
+  persistSurveys();
+  $('savedSummary').textContent = 'Survey ' + result.survey.number + ' — ' + result.survey.address + ' saved.';
+  showView('saved');
+});
+
+$('btnStartNext').addEventListener('click', function(){ resetSurveyForm(); showView('survey'); });
+$('btnGoToList').addEventListener('click', function(){ renderList(); showView('list'); });
+
+/* ---------- Survey list ---------- */
+function fmtDate(iso){
+  if (!iso) return '';
+  var d = new Date(iso);
+  return d.toLocaleString();
+}
+
+function renderList(){
+  var container = $('listContainer');
+  if (!surveys.length){
+    container.innerHTML = '<p class="empty-state">No surveys saved yet. Use "New Quick Survey" from the dashboard.</p>';
+    return;
+  }
+  var sorted = surveys.slice().sort(function(a,b){ return new Date(b.updatedAt) - new Date(a.updatedAt); });
+  var html = '<table><thead><tr><th>Survey #</th><th>Address</th><th>Asset</th><th>Problem</th><th>Updated</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  sorted.forEach(function(s){
+    html += '<tr>' +
+      '<td>' + s.number + '</td>' +
+      '<td>' + (s.address||'') + (s.unit ? (', ' + s.unit) : '') + '</td>' +
+      '<td>' + (s.asset||'-') + '</td>' +
+      '<td>' + ((s.problems||[]).join(', ') || '-') + '</td>' +
+      '<td>' + fmtDate(s.updatedAt) + '</td>' +
+      '<td><span class="status-pill">' + (s.status||'Needs Review') + '</span></td>' +
+      '<td>' +
+        '<div class="row-actions">' +
+        '<button class="btn" data-act="edit" data-id="' + s.id + '">Edit</button>' +
+        '<button class="btn" data-act="report" data-id="' + s.id + '">View Report</button>' +
+        '<button class="btn" data-act="pdf" data-id="' + s.id + '">Save PDF</button>' +
+        '<button class="btn" data-act="email" data-id="' + s.id + '">Email</button>' +
+        '<button class="btn" data-act="quote" data-id="' + s.id + '">Create Quote</button>' +
+        '<button class="btn danger" data-act="delete" data-id="' + s.id + '">Delete</button>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('button[data-act]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = this.getAttribute('data-id');
+      var act = this.getAttribute('data-act');
+      var survey = surveys.find(function(s){ return s.id === id; });
+      if (!survey) return;
+      if (act === 'edit'){ loadSurveyIntoForm(survey); showView('survey'); }
+      else if (act === 'report'){ renderReport(survey); showView('report'); }
+      else if (act === 'pdf'){ renderReport(survey); showView('report'); setTimeout(function(){ window.print(); }, 150); }
+      else if (act === 'email'){ renderReport(survey); showView('report'); openEmailDraft(survey); }
+      else if (act === 'quote'){ startQuoteFromSurvey(survey); }
+      else if (act === 'delete'){
+        state.pendingDeleteId = id;
+        $('deleteModalText').textContent = 'Survey ' + survey.number + ' (' + survey.address + ') will be permanently deleted.';
+        $('deleteModal').classList.remove('hidden');
+      }
+    });
+  });
+}
+
+$('cancelDeleteBtn').addEventListener('click', function(){ state.pendingDeleteId = null; $('deleteModal').classList.add('hidden'); });
+$('confirmDeleteBtn').addEventListener('click', function(){
+  if (!state.pendingDeleteId) return;
+  surveys = deleteSurvey(surveys, state.pendingDeleteId);
+  persistSurveys();
+  state.pendingDeleteId = null;
+  $('deleteModal').classList.add('hidden');
+  renderList();
+});
+
+/* ---------- Survey report ---------- */
+function renderReport(survey){
+  state.currentReportId = survey.id;
+  var photosHtml = '';
+  Object.keys(survey.photos || {}).forEach(function(slot){
+    photosHtml += '<div style="text-align:center"><img src="' + survey.photos[slot] + '"><div style="font-size:11px">' + slot + '</div></div>';
+  });
+  var html =
+    '<div style="border-bottom:2px solid var(--green-dark); padding-bottom:10px; margin-bottom:14px;">' +
+      '<h2 style="color:var(--green-dark); margin:0">' + companySettings.name + '</h2>' +
+      '<p style="margin:2px 0; color:#556">' + companySettings.tagline + '</p>' +
+      '<h3 style="margin:10px 0 0">Internal Survey Report — ' + survey.number + '</h3>' +
+      '<p style="margin:2px 0; font-size:13px; color:#556">Saved: ' + fmtDate(survey.createdAt) + ' &nbsp;|&nbsp; Updated: ' + fmtDate(survey.updatedAt) + '</p>' +
+    '</div>' +
+    '<div class="report-section"><h4>Property</h4><p>' + (survey.address||'') +
+      (survey.building ? ('<br>' + survey.building) : '') +
+      (survey.unit ? ('<br>Unit/Suite/Floor: ' + survey.unit) : '') + '</p></div>' +
+    '<div class="report-section"><h4>Asset Type</h4><p>' + (survey.asset || '-') + '</p></div>' +
+    '<div class="report-section"><h4>Problem(s)</h4><p>' + ((survey.problems||[]).join(', ') || '-') + '</p></div>' +
+    '<div class="report-section"><h4>Technician Note</h4><p>' + (survey.note || '-') + '</p></div>' +
+    (photosHtml ? ('<div class="report-section"><h4>Photos</h4><div class="report-photos">' + photosHtml + '</div></div>') : '') +
+    (survey.officeNotes ? ('<div class="report-section"><h4>Office Notes (internal only)</h4><p>' + survey.officeNotes + '</p></div>') : '') +
+    (survey.doorFrame ? ('<div class="report-section"><h4>Door / Frame Details</h4><p>' + survey.doorFrame + '</p></div>') : '') +
+    (survey.glassHardware ? ('<div class="report-section"><h4>Glass / Hardware Details</h4><p>' + survey.glassHardware + '</p></div>') : '') +
+    (survey.access ? ('<div class="report-section"><h4>Access &amp; Safety</h4><p>' + survey.access + '</p></div>') : '') +
+    (survey.supplier ? ('<div class="report-section"><h4>Supplier / Pricing Notes</h4><p>' + survey.supplier + '</p></div>') : '');
+  $('reportContainer').innerHTML = html;
+}
+
+$('btnPrintReport').addEventListener('click', function(){ window.print(); });
+$('btnEmailReport').addEventListener('click', function(){
+  var survey = surveys.find(function(s){ return s.id === state.currentReportId; });
+  if (survey) openEmailDraft(survey);
+});
+
+function openEmailDraft(survey){
+  var subject = 'Site Survey Report — ' + survey.address + ' — ' + survey.number;
+  var body = 'Survey ' + survey.number + '\n' +
+    'Address: ' + survey.address + '\n' +
+    'Asset: ' + (survey.asset||'-') + '\n' +
+    'Problem: ' + ((survey.problems||[]).join(', ')||'-') + '\n\n' +
+    'Note: this survey report PDF must be attached manually. Use "Print / Save Survey PDF" to save it first, then attach the file here.';
+  var mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailto;
+}
+
+/* ================= PHASE 2: QUOTES ================= */
+
+function populateCatalogSelect(){
+  var sel = $('q_catalogPick');
+  sel.innerHTML = '<option value="">-- choose from catalog --</option>' +
+    LINE_ITEM_CATALOG.map(function(name){ return '<option value="' + name + '">' + name + '</option>'; }).join('') +
+    '<option value="__custom__">Custom item…</option>';
+}
+populateCatalogSelect();
+
+function startQuoteFromSurvey(survey){
+  state.quoteDraft = {
+    id: null,
+    surveyId: survey.id,
+    surveyNumber: survey.number,
+    clientName: '',
+    clientAddress: survey.address + (survey.building ? (', ' + survey.building) : '') + (survey.unit ? (', ' + survey.unit) : ''),
+    status: 'Draft',
+    scopeOfWork: '',
+    lineItems: [],
+    leadTime: '',
+    depositRate: 0.5,
+    terms: companySettings.terms
+  };
+  loadQuoteDraftIntoForm();
+  $('quoteFormTitle').textContent = 'Create Quote — from ' + survey.number;
+  showView('quote-form');
+}
+
+function startQuoteFromExisting(quote){
+  state.quoteDraft = JSON.parse(JSON.stringify(quote));
+  loadQuoteDraftIntoForm();
+  $('quoteFormTitle').textContent = 'Edit Quote — ' + quote.number;
+  showView('quote-form');
+}
+
+function loadQuoteDraftIntoForm(){
+  var q = state.quoteDraft;
+  $('quoteSurveyRef').textContent = q.surveyNumber ? ('Linked survey: ' + q.surveyNumber) : 'No linked survey';
+  $('q_clientName').value = q.clientName || '';
+  $('q_clientAddress').value = q.clientAddress || '';
+  $('q_status').value = q.status || 'Draft';
+  $('q_scope').value = q.scopeOfWork || '';
+  $('q_leadTime').value = q.leadTime || '';
+  $('q_depositRate').value = String(q.depositRate != null ? q.depositRate : 0.5);
+  $('q_terms').value = q.terms != null ? q.terms : companySettings.terms;
+  $('quoteSaveHint').textContent = '';
+  renderLineItemsTable();
+  recomputeTotals();
+}
+
+function renderLineItemsTable(){
+  var body = $('lineItemsBody');
+  var items = state.quoteDraft.lineItems;
+  if (!items.length){
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#667">No line items yet. Pick one from the catalog above and click "+ Add Line Item".</td></tr>';
+    return;
+  }
+  body.innerHTML = items.map(function(li){
+    var total = (Number(li.qty)||0) * (Number(li.unitPrice)||0);
+    return '<tr data-id="' + li.id + '">' +
+      '<td><input type="text" class="li-name" value="' + (li.name||'').replace(/"/g,'&quot;') + '"></td>' +
+      '<td><input type="text" class="li-desc" value="' + (li.description||'').replace(/"/g,'&quot;') + '"></td>' +
+      '<td style="width:70px"><input type="number" class="li-qty" min="0" step="1" value="' + (li.qty!=null?li.qty:1) + '"></td>' +
+      '<td style="width:110px"><input type="number" class="li-price" min="0" step="0.01" value="' + (li.unitPrice!=null?li.unitPrice:0) + '"></td>' +
+      '<td class="li-total">' + money(total) + '</td>' +
+      '<td><button class="btn danger" data-del="' + li.id + '">Delete</button></td>' +
+    '</tr>';
+  }).join('');
+
+  body.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var row = this.closest('tr');
+      var id = row.getAttribute('data-id');
+      var patch = {};
+      if (this.classList.contains('li-name')) patch.name = this.value;
+      if (this.classList.contains('li-desc')) patch.description = this.value;
+      if (this.classList.contains('li-qty')) patch.qty = this.value;
+      if (this.classList.contains('li-price')) patch.unitPrice = this.value;
+      state.quoteDraft.lineItems = updateLineItem(state.quoteDraft.lineItems, id, patch);
+      var li = state.quoteDraft.lineItems.find(function(x){ return x.id === id; });
+      row.querySelector('.li-total').textContent = money((Number(li.qty)||0) * (Number(li.unitPrice)||0));
+      recomputeTotals();
+    });
+  });
+  body.querySelectorAll('button[data-del]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = this.getAttribute('data-del');
+      state.quoteDraft.lineItems = deleteLineItem(state.quoteDraft.lineItems, id);
+      renderLineItemsTable();
+      recomputeTotals();
+    });
+  });
+}
+
+$('btnAddLineItem').addEventListener('click', function(){
+  var pick = $('q_catalogPick').value;
+  if (!pick){ return; }
+  var name = pick === '__custom__' ? '' : pick;
+  state.quoteDraft.lineItems = addLineItem(state.quoteDraft.lineItems, { name: name, description: '', qty: 1, unitPrice: 0 });
+  $('q_catalogPick').value = '';
+  renderLineItemsTable();
+  recomputeTotals();
+});
+
+function recomputeTotals(){
+  var rate = parseFloat($('q_depositRate').value);
+  var totals = computeTotals(state.quoteDraft.lineItems, rate);
+  $('t_subtotal').textContent = money(totals.subtotal);
+  $('t_hst').textContent = money(totals.hst);
+  $('t_total').textContent = money(totals.total);
+  $('t_deposit').textContent = money(totals.deposit);
+  state.quoteDraft.computedTotals = totals;
+}
+$('q_depositRate').addEventListener('change', recomputeTotals);
+
+$('btnSaveQuote').addEventListener('click', function(){
+  if (!state.quoteDraft.lineItems.length){
+    $('quoteSaveHint').textContent = 'Add at least one line item before saving.';
+    $('quoteSaveHint').style.color = 'var(--red)';
+    return;
+  }
+  var rate = parseFloat($('q_depositRate').value);
+  var totals = computeTotals(state.quoteDraft.lineItems, rate);
+  var data = Object.assign({}, state.quoteDraft, {
+    clientName: $('q_clientName').value.trim(),
+    clientAddress: $('q_clientAddress').value.trim(),
+    status: $('q_status').value,
+    scopeOfWork: $('q_scope').value.trim(),
+    leadTime: $('q_leadTime').value.trim(),
+    depositRate: rate,
+    terms: $('q_terms').value,
+    subtotal: totals.subtotal,
+    hst: totals.hst,
+    total: totals.total,
+    deposit: totals.deposit
+  });
+  delete data.computedTotals;
+  if (!data.id) delete data.id;
+  var result = saveQuote(quotes, data, quoteCounter);
+  quotes = result.quotes;
+  quoteCounter = result.counterState;
+  persistQuotes();
+  persistCounter();
+  state.quoteDraft = null;
+  renderQuotesList();
+  showView('quotes');
+});
+
+$('btnDiscardQuote').addEventListener('click', function(){
+  if (state.quoteDraft && state.quoteDraft.id){
+    state.quoteDraft = null;
+    renderQuotesList();
+    showView('quotes');
+    return;
+  }
+  $('discardModal').classList.remove('hidden');
+});
+$('cancelDiscardBtn').addEventListener('click', function(){ $('discardModal').classList.add('hidden'); });
+$('confirmDiscardBtn').addEventListener('click', function(){
+  state.quoteDraft = null;
+  $('discardModal').classList.add('hidden');
+  showView('dashboard');
+});
+
+/* ---------- Quotes list ---------- */
+function renderQuotesList(){
+  var container = $('quotesListContainer');
+  if (!quotes.length){
+    container.innerHTML = '<p class="empty-state">No quotes yet. Create one from a saved survey (Continue Draft → Create Quote).</p>';
+    return;
+  }
+  var sorted = quotes.slice().sort(function(a,b){ return new Date(b.updatedAt) - new Date(a.updatedAt); });
+  var html = '<table><thead><tr><th>Quote #</th><th>Survey</th><th>Client / Address</th><th>Status</th><th>Total</th><th>Updated</th><th>Actions</th></tr></thead><tbody>';
+  sorted.forEach(function(q){
+    html += '<tr>' +
+      '<td>' + q.number + '</td>' +
+      '<td>' + (q.surveyNumber||'-') + '</td>' +
+      '<td>' + (q.clientName ? (q.clientName + '<br>') : '') + (q.clientAddress||'') + '</td>' +
+      '<td><span class="status-pill' + (q.status==='Void' ? ' void' : '') + '">' + q.status + '</span></td>' +
+      '<td>' + money(q.total) + '</td>' +
+      '<td>' + fmtDate(q.updatedAt) + '</td>' +
+      '<td><div class="row-actions">' +
+        '<button class="btn" data-act="edit" data-id="' + q.id + '">Edit</button>' +
+        '<button class="btn" data-act="pdf" data-id="' + q.id + '">Print/PDF</button>' +
+        '<button class="btn" data-act="email" data-id="' + q.id + '">Email</button>' +
+        '<button class="btn danger" data-act="voiddelete" data-id="' + q.id + '">Void/Delete</button>' +
+      '</div></td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('button[data-act]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = this.getAttribute('data-id');
+      var act = this.getAttribute('data-act');
+      var quote = quotes.find(function(q){ return q.id === id; });
+      if (!quote) return;
+      if (act === 'edit'){ startQuoteFromExisting(quote); }
+      else if (act === 'pdf'){ renderQuoteReport(quote); showView('quote-report'); setTimeout(function(){ window.print(); }, 150); }
+      else if (act === 'email'){ renderQuoteReport(quote); showView('quote-report'); openQuoteEmailDraft(quote); }
+      else if (act === 'voiddelete'){
+        state.pendingVoidQuoteId = id;
+        $('voidQuoteText').textContent = 'Quote ' + quote.number + ' (' + (quote.clientAddress||'') + ', total ' + money(quote.total) + ') — choose an action below.';
+        $('voidQuoteModal').classList.remove('hidden');
+      }
+    });
+  });
+}
+
+$('cancelVoidBtn').addEventListener('click', function(){ state.pendingVoidQuoteId = null; $('voidQuoteModal').classList.add('hidden'); });
+$('confirmVoidBtn').addEventListener('click', function(){
+  if (!state.pendingVoidQuoteId) return;
+  quotes = voidQuote(quotes, state.pendingVoidQuoteId);
+  persistQuotes();
+  state.pendingVoidQuoteId = null;
+  $('voidQuoteModal').classList.add('hidden');
+  renderQuotesList();
+});
+$('confirmHardDeleteBtn').addEventListener('click', function(){
+  if (!state.pendingVoidQuoteId) return;
+  quotes = deleteQuote(quotes, state.pendingVoidQuoteId);
+  persistQuotes();
+  state.pendingVoidQuoteId = null;
+  $('voidQuoteModal').classList.add('hidden');
+  renderQuotesList();
+});
+
+/* ---------- Quote report / print ---------- */
+function renderQuoteReport(quote){
+  state.currentQuoteReportId = quote.id;
+  var rowsHtml = (quote.lineItems||[]).map(function(li){
+    var total = (Number(li.qty)||0) * (Number(li.unitPrice)||0);
+    return '<tr><td>' + (li.name||'') + '</td><td>' + (li.description||'') + '</td><td>' + (li.qty||0) + '</td><td>' + money(li.unitPrice) + '</td><td>' + money(total) + '</td></tr>';
+  }).join('');
+  var html =
+    '<div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--quote-accent); padding-bottom:10px; margin-bottom:14px;">' +
+      '<div>' +
+        '<h2 style="color:var(--quote-accent); margin:0">' + companySettings.name + '</h2>' +
+        '<p style="margin:2px 0; color:#556">' + companySettings.tagline + '</p>' +
+        '<p style="margin:2px 0; font-size:12px; color:#556">' + companySettings.address + ' | ' + companySettings.phone + ' | ' + companySettings.email + '<br>' + companySettings.website + ' | HST#: ' + companySettings.hst + '</p>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<h3 style="margin:0">Quote ' + quote.number + '</h3>' +
+        '<p style="margin:2px 0; font-size:13px">Status: ' + quote.status + '</p>' +
+        '<p style="margin:2px 0; font-size:13px">Updated: ' + fmtDate(quote.updatedAt) + '</p>' +
+        '<p style="margin:2px 0; font-size:16px; font-weight:700; color:var(--quote-accent)">Total: ' + money(quote.total) + '</p>' +
+      '</div>' +
+    '</div>' +
+    '<div class="report-section"><h4>Recipient</h4><p>' + (quote.clientName ? (quote.clientName + '<br>') : '') + (quote.clientAddress||'') + '</p></div>' +
+    (quote.surveyNumber ? ('<div class="report-section"><h4>Linked Survey</h4><p>' + quote.surveyNumber + '</p></div>') : '') +
+    (quote.scopeOfWork ? ('<div class="report-section"><h4>Scope of Work</h4><p>' + quote.scopeOfWork + '</p></div>') : '') +
+    '<div class="report-section"><h4>Product / Service</h4><table><thead><tr><th>Product/Service</th><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' +
+    '<div class="totals-box">' +
+      '<div class="totals-row"><span>Subtotal</span><span>' + money(quote.subtotal) + '</span></div>' +
+      '<div class="totals-row"><span>HST (13%)</span><span>' + money(quote.hst) + '</span></div>' +
+      '<div class="totals-row grand"><span>Total</span><span>' + money(quote.total) + '</span></div>' +
+      '<div class="totals-row"><span>Deposit Due (' + (quote.depositRate===1 ? '100%' : '50%') + ')</span><span>' + money(quote.deposit) + '</span></div>' +
+    '</div>' +
+    (quote.leadTime ? ('<div class="report-section"><h4>Lead Time</h4><p>' + quote.leadTime + '</p></div>') : '') +
+    '<div class="report-section"><h4>Terms &amp; Warranty</h4><p style="white-space:pre-wrap">' + (quote.terms||'') + '</p></div>' +
+    '<div class="report-section" style="margin-top:30px"><p>Signature: ______________________&nbsp;&nbsp;&nbsp;&nbsp;Date: ______________</p></div>';
+  $('quoteReportContainer').innerHTML = html;
+}
+
+$('btnPrintQuote').addEventListener('click', function(){ window.print(); });
+$('btnEmailQuote').addEventListener('click', function(){
+  var quote = quotes.find(function(q){ return q.id === state.currentQuoteReportId; });
+  if (quote) openQuoteEmailDraft(quote);
+});
+
+function openQuoteEmailDraft(quote){
+  var subject = 'Quote ' + quote.number + ' — ' + (quote.clientAddress||'');
+  var body = 'Quote ' + quote.number + '\n' +
+    'Client: ' + (quote.clientName||'-') + '\n' +
+    'Address: ' + (quote.clientAddress||'-') + '\n' +
+    'Total: ' + money(quote.total) + '\n' +
+    'Deposit Due: ' + money(quote.deposit) + '\n\n' +
+    'Note: this quote PDF must be attached manually. Use "Print / Save Quote PDF" first, then attach the file here.';
+  var mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailto;
+}
+
+/* ---------- Init ---------- */
+resetSurveyForm();
+showView('dashboard');
+</script>
+</body>
+</html>
