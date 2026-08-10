@@ -779,24 +779,39 @@ function loadSurveyIntoForm(survey){
 var SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 var recognitionSupported = !!SpeechRecognitionCtor;
 var recognition = null;
+var manualStop = false;
+var finalTranscriptAccum = '';
 if (recognitionSupported){
   recognition = new SpeechRecognitionCtor();
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = 'en-US';
   recognition.onresult = function(event){
-    var transcript = '';
-    for (var i = 0; i < event.results.length; i++){
-      transcript += event.results[i][0].transcript + ' ';
+    var interim = '';
+    for (var i = event.resultIndex; i < event.results.length; i++){
+      var transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal){
+        finalTranscriptAccum += transcript + ' ';
+      } else {
+        interim += transcript;
+      }
     }
-    $('f_note').value = transcript.trim();
+    $('f_note').value = (finalTranscriptAccum + interim).trim();
   };
   recognition.onerror = function(event){
+    if (event.error === 'no-speech' || event.error === 'aborted'){
+      return;
+    }
+    manualStop = true;
     state.voiceState = VOICE_STATES.UNAVAILABLE;
     $('voiceStatus').textContent = 'Microphone error: ' + event.error + '. You can still type your note manually.';
     updateVoiceButton();
   };
   recognition.onend = function(){
+    if (state.voiceState === VOICE_STATES.LISTENING && !manualStop){
+      try { recognition.start(); } catch(e){ /* recognition may already be starting; ignore */ }
+      return;
+    }
     if (state.voiceState === VOICE_STATES.LISTENING){
       state.voiceState = $('f_note').value.trim() ? VOICE_STATES.CAPTURED : VOICE_STATES.IDLE;
       updateVoiceButton();
@@ -819,11 +834,14 @@ function updateVoiceButton(){
 $('voiceBtn').addEventListener('click', function(){
   if (!recognitionSupported){ return; }
   if (state.voiceState === VOICE_STATES.LISTENING){
+    manualStop = true;
     recognition.stop();
     state.voiceState = $('f_note').value.trim() ? VOICE_STATES.CAPTURED : VOICE_STATES.IDLE;
     updateVoiceButton();
     return;
   }
+  manualStop = false;
+  finalTranscriptAccum = '';
   try {
     recognition.start();
     state.voiceState = VOICE_STATES.LISTENING;
