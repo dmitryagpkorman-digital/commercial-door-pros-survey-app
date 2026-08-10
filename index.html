@@ -781,9 +781,10 @@ var recognitionSupported = !!SpeechRecognitionCtor;
 var recognition = null;
 var manualStop = false;
 var finalTranscriptAccum = '';
+var lastAppendedFinal = '';
 if (recognitionSupported){
   recognition = new SpeechRecognitionCtor();
-  recognition.continuous = true;
+  recognition.continuous = false;
   recognition.interimResults = true;
   recognition.lang = 'en-US';
   recognition.onresult = function(event){
@@ -791,7 +792,11 @@ if (recognitionSupported){
     for (var i = event.resultIndex; i < event.results.length; i++){
       var transcript = event.results[i][0].transcript;
       if (event.results[i].isFinal){
-        finalTranscriptAccum += transcript + ' ';
+        var cleaned = transcript.trim();
+        if (cleaned && cleaned.toLowerCase() !== lastAppendedFinal.toLowerCase()){
+          finalTranscriptAccum += cleaned + ' ';
+          lastAppendedFinal = cleaned;
+        }
       } else {
         interim += transcript;
       }
@@ -809,7 +814,11 @@ if (recognitionSupported){
   };
   recognition.onend = function(){
     if (state.voiceState === VOICE_STATES.LISTENING && !manualStop){
-      try { recognition.start(); } catch(e){ /* recognition may already be starting; ignore */ }
+      setTimeout(function(){
+        if (state.voiceState === VOICE_STATES.LISTENING && !manualStop){
+          try { recognition.start(); } catch(e){ /* recognition may already be starting; ignore */ }
+        }
+      }, 300);
       return;
     }
     if (state.voiceState === VOICE_STATES.LISTENING){
@@ -842,6 +851,7 @@ $('voiceBtn').addEventListener('click', function(){
   }
   manualStop = false;
   finalTranscriptAccum = '';
+  lastAppendedFinal = '';
   try {
     recognition.start();
     state.voiceState = VOICE_STATES.LISTENING;
